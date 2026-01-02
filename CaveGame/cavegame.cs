@@ -1,4 +1,5 @@
 ﻿using Game;
+using System.Globalization;
 using System.Threading;
 
 namespace CaveGame
@@ -8,7 +9,6 @@ namespace CaveGame
         public static void Main()
         {
             Console.CursorVisible = false;
-            bool visibleFlag = true;
             Person person = new Person();
             Menu menu = new Menu();
             GameMap map = new GameMap();
@@ -20,8 +20,7 @@ namespace CaveGame
                 while (true)
                 {
                     Console.SetCursorPosition(0, 0);
-                    map.GetMap(person, visibleFlag);
-                    person.GetLightPos(map.map);
+                    map.GetMap(person, person.CheckPos(map.map));
                     input.GetInputMenu(map.map, person);
                 }
             }
@@ -34,6 +33,9 @@ namespace CaveGame
 
     class GameMap
     {
+        private bool visionFlag = false;
+        private DateTime lightEnd = DateTime.MinValue;
+
         public string[] rawMap = new string[]
         {
     "########################################################################################################################",
@@ -74,6 +76,7 @@ namespace CaveGame
 
         public void GetMap(Person person, bool flag)
         {
+
             for (int i = 0; i < 30; i++)
             {
                 for (int j = 0; j < 120; j++)
@@ -88,47 +91,77 @@ namespace CaveGame
                     }
                 }
             }
+            
+            person.GetLightPos(map);
 
-            switch (flag) // если подобрал *, то тру
+            if (flag)
             {
-                case true:
-                    for (int i = 0; i < 30; i++)    //полная прорисовка карты
-                    {
-                        for (int j = 0; j < 120; j++)
-                        {
-                            Console.Write(map[i, j]);
-                        }
+                lightEnd = DateTime.Now.AddSeconds(5);
+                visionFlag = true;
+            }
+            else if (visionFlag && DateTime.Now > lightEnd)
+            {
+                visionFlag = false;
+                Console.Clear();
+            }
 
-                        if (i < 29)
+                switch (visionFlag) // если подобрал *, то тру
+                {
+                    case true:
+                        for (int i = 0; i < 30; i++)    //полная прорисовка карты
                         {
-                            Console.WriteLine();
-                        }
-                    }
-                    break;
-                    //реализовать временное отображение карты при подборе *
-                case false:
-                    for (int y = -4; y <= 4; y++)
-                    {
-                        for (int x = -4; x <= 4; x++)
-                        {
-                            if (person.personY + y >= 0 && person.personY + y < 30 && person.personX + x >= 0 && person.personX + x < 120)
+                            for (int j = 0; j < 120; j++)
                             {
-                                Console.SetCursorPosition(person.personX + x, person.personY + y);
-                                
-
-                                if (y == -4 || y == 4 || x == -4 || x == 4)
+                                if (map[i, j] == "*")
                                 {
-                                    Console.Write(" ");
+                                    Console.ForegroundColor = ConsoleColor.Red;
+                                    Console.Write(map[i, j]);
+                                    Console.ResetColor();
                                 }
                                 else
                                 {
-                                    Console.Write(map[person.personY + y, person.personX + x]);
+                                    Console.Write(map[i, j]);
+                                }
+                            }
+
+                            if (i < 29)
+                            {
+                                Console.WriteLine();
+                            }
+                        }
+                        break;
+                    case false:
+                        for (int y = -4; y <= 4; y++)
+                        {
+                            for (int x = -4; x <= 4; x++)
+                            {
+                                if (person.personY + y >= 0 && person.personY + y < 30 && person.personX + x >= 0 && person.personX + x < 120)
+                                {
+                                    Console.SetCursorPosition(person.personX + x, person.personY + y);
+
+
+                                    if (y == -4 || y == 4 || x == -4 || x == 4)
+                                    {
+                                        Console.Write(" ");
+                                    }
+                                    else
+                                    {
+                                        if (map[person.personY + y, person.personX + x] == "*")
+                                        {
+                                            Console.ForegroundColor = ConsoleColor.Red;
+                                            Console.Write(map[person.personY + y, person.personX + x]);
+                                            Console.ResetColor();
+                                        }
+                                        else
+                                        {
+                                            Console.Write(map[person.personY + y, person.personX + x]);
+                                        }
+                                    }
                                 }
                             }
                         }
-                    }
-                    break;
-            }
+                        break;
+                }
         }
     }
 
@@ -147,9 +180,9 @@ namespace CaveGame
         {
             Random rnd = new Random();
 
-            while (true)
+            while (lightY != -1 && lightX != -1)
             {   
-                if (map[lightY, lightX] == "#" || map[lightY, lightX] == "@")
+                if (map[lightY, lightX] == "#")
                 {
                     lightX = rnd.Next(1, 118);
                     lightY = rnd.Next(1, 28);
@@ -159,9 +192,21 @@ namespace CaveGame
                     break;
                 }
             }
-            Console.ForegroundColor = ConsoleColor.Yellow;
-            map[lightY, lightX] = light;
-            Console.ResetColor();
+            if (lightY != -1 && lightX != -1)
+            {
+                map[lightY, lightX] = light;
+            }
+        }
+
+        public bool CheckPos(string[,] map)
+        {
+            if (lightX == personX && lightY == personY)
+            {
+                map[lightY, lightX] = " ";
+                lightY = lightX = -1;
+                return true;
+            }
+            return false;
         }
     }
 
