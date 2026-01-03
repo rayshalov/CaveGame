@@ -50,7 +50,7 @@ namespace CaveGame
 
         private DateTime lightEnd = DateTime.MinValue;
 
-        public string[] map = new string[]
+        public string[] map { get; } = new string[]
         {
     "########################################################################################################################",
     "#        #######                  #                              #             #                  #                    #",
@@ -97,75 +97,73 @@ namespace CaveGame
                 Console.Clear();
             }
 
-            switch (visionFlag) // если подобрал *, то тру
+            if (visionFlag) // если подобрал *, то тру
             {
-                case true:
-                    for (int i = 0; i < 30; i++)    //полная прорисовка карты
+                for (int i = 0; i < 30; i++)    //полная прорисовка карты
+                {
+                    for (int j = 0; j < 120; j++)
                     {
-                        for (int j = 0; j < 120; j++)
+                        if (i == person.personY && j == person.personX)
                         {
-                            if (i == person.personY && j == person.personX)
+                            Console.ForegroundColor = ConsoleColor.Green;
+                            Console.Write('@');
+                            Console.ResetColor();
+                        }
+                        else if (i == person.lightY && j == person.lightX)
+                        {
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.Write('*');
+                            Console.ResetColor();
+                        }
+                        else
+                        {
+                            Console.Write(map[i][j]);
+                        }
+                    }
+
+                    if (i < 29)
+                    {
+                        Console.WriteLine();
+                    }
+                }
+            }
+            else
+            {
+                for (int y = -4; y <= 4; y++)
+                {
+                    for (int x = -4; x <= 4; x++)
+                    {
+                        if (person.personY + y >= 0 && person.personY + y < 30 && person.personX + x >= 0 && person.personX + x < 120)
+                        {
+                            Console.SetCursorPosition(person.personX + x, person.personY + y);
+
+                            if (y == -4 || y == 4 || x == -4 || x == 4)
                             {
-                                Console.ForegroundColor = ConsoleColor.Green;
-                                Console.Write('@');
-                                Console.ResetColor();
-                            }
-                            else if (i == person.lightY && j == person.lightX)
-                            {
-                                Console.ForegroundColor = ConsoleColor.Red;
-                                Console.Write('*');
-                                Console.ResetColor();
+                                Console.Write(" ");
                             }
                             else
                             {
-                                Console.Write(map[i][j]);
-                            }
-                        }
 
-                        if (i < 29)
-                        {
-                            Console.WriteLine();
-                        }
-                    }
-                    break;
-                case false:
-                    for (int y = -4; y <= 4; y++)
-                    {
-                        for (int x = -4; x <= 4; x++)
-                        {
-                            if (person.personY + y >= 0 && person.personY + y < 30 && person.personX + x >= 0 && person.personX + x < 120)
-                            {
-                                Console.SetCursorPosition(person.personX + x, person.personY + y);
-
-
-                                if (y == -4 || y == 4 || x == -4 || x == 4)
+                                if (person.personY + y == person.personY && person.personX + x == person.personX)
                                 {
-                                    Console.Write(" ");
+                                    Console.ForegroundColor = ConsoleColor.Green;
+                                    Console.Write('@');
+                                    Console.ResetColor();
+                                }
+                                else if (person.personY + y == person.lightY && person.personX + x == person.lightX)
+                                {
+                                    Console.ForegroundColor = ConsoleColor.Red;
+                                    Console.Write('*');
+                                    Console.ResetColor();
                                 }
                                 else
                                 {
-
-                                    if (person.personY + y == person.personY && person.personX + x == person.personX)
-                                    {
-                                        Console.ForegroundColor = ConsoleColor.Green;
-                                        Console.Write('@');
-                                        Console.ResetColor();
-                                    }
-                                    else if (person.personY + y == person.lightY && person.personX + x == person.lightX)
-                                    {
-                                        Console.ForegroundColor = ConsoleColor.Red;
-                                        Console.Write('*');
-                                        Console.ResetColor();
-                                    }
-                                    else
-                                    {
-                                        Console.Write(map[person.personY + y][person.personX + x]);
-                                    }
+                                    Console.Write(map[person.personY + y][person.personX + x]);
                                 }
                             }
                         }
                     }
-                    break;
+                }
             }
         }
     }
@@ -191,11 +189,11 @@ namespace CaveGame
             }
         }
 
-        public char person = '@';
+        public char person { get; } = '@';
         public int personX { get; private set; } = 1;
         public int personY { get; private set; } = 1;
 
-        public char light = '*';
+        public char light { get; } = '*';
         public int lightX { get; private set; } = 0;
         public int lightY { get; private set; } = 0;
 
