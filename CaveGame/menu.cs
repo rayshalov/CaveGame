@@ -3,12 +3,12 @@
     class Menu
     {
         public bool ChoisedButton = true;
-        public string Play = "Играть";
-        public string Quit = "Выйти";
-        public string symbol = "<";
+        public string Play { get; } = "Играть";
+        public string Quit { get; } = "Выйти";
+        public string symbol { get; } = "<";
 
-        public int width = Console.WindowWidth;
-        public int height = Console.WindowHeight;
+        public int width { get; } = Console.WindowWidth;
+        public int height { get; } = Console.WindowHeight;
 
         public void ShowMenuWord()
         {
