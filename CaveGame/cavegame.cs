@@ -14,14 +14,17 @@ namespace CaveGame
             GameMap map = new GameMap();
             Person person = new Person(map.map);
             GetInput input = new GetInput();
+            GUI gui = new GUI();
 
             if (menu.GetInputMenu())
             {
                 Console.Clear();
                 while (true)
                 {
+                    gui.FPSCounter();
                     Console.SetCursorPosition(0, 0);
                     map.GetMap(person, person.CheckPosLight(map.map));
+                    gui.ShowFPS();
                     input.GetInputMenu(map.map, person, map);
                 }
             }
@@ -35,7 +38,7 @@ namespace CaveGame
     class GameMap
     {
         public bool visionFlag { get; private set; } = false;
-
+        public bool fieldOnScreen = false;
         public void Cheat(ConsoleKey key)
         {
             if (key == ConsoleKey.Spacebar)
@@ -99,36 +102,46 @@ namespace CaveGame
 
             if (visionFlag) // если подобрал *, то тру
             {
-                for (int i = 0; i < 30; i++)    //полная прорисовка карты
+
+                if (fieldOnScreen == false)
                 {
-                    for (int j = 0; j < 120; j++)
+                    for (int i = 0; i < 30; i++)    //полная прорисовка карты
                     {
-                        if (i == person.personY && j == person.personX)
-                        {
-                            Console.ForegroundColor = ConsoleColor.Green;
-                            Console.Write('@');
-                            Console.ResetColor();
-                        }
-                        else if (i == person.lightY && j == person.lightX)
-                        {
-                            Console.ForegroundColor = ConsoleColor.Red;
-                            Console.Write('*');
-                            Console.ResetColor();
-                        }
-                        else
+                        for (int j = 0; j < 120; j++)
                         {
                             Console.Write(map[i][j]);
                         }
-                    }
 
-                    if (i < 29)
-                    {
-                        Console.WriteLine();
+                        if (i < 29)
+                        {
+                            Console.WriteLine();
+                        }
                     }
                 }
+
+                fieldOnScreen = true;
+
+                Console.SetCursorPosition(person.personX, person.personY);
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine(person.person);
+                Console.ResetColor();
+                Console.SetCursorPosition(person.lastPersonX, person.lastPersonY);
+                Console.WriteLine(map[person.lastPersonY][person.lastPersonX]);
+
+                if (person.lightX != -1 && person.lightY != -1)
+                {
+                    Console.SetCursorPosition(person.lightX, person.lightY);
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine(person.light);
+                    Console.ResetColor();
+                }
+
+
             }
             else
             {
+                fieldOnScreen = false;
+
                 for (int y = -4; y <= 4; y++)
                 {
                     for (int x = -4; x <= 4; x++)
@@ -192,6 +205,9 @@ namespace CaveGame
         public char person { get; } = '@';
         public int personX { get; private set; } = 1;
         public int personY { get; private set; } = 1;
+        public int lastPersonX { get; private set; } = 1;
+        public int lastPersonY { get; private set; } = 1;
+
 
         public char light { get; } = '*';
         public int lightX { get; private set; } = 0;
@@ -215,6 +231,8 @@ namespace CaveGame
                 {
                     if (map[newY][newX] != '#')
                     {
+                        lastPersonX = personX;
+                        lastPersonY = personY;
                         personX = newX;
                         personY = newY;
                     }
@@ -227,12 +245,16 @@ namespace CaveGame
     {
         public void GetInputMenu(string[] map, Person person, GameMap cfg)
         {
-
-            while (Console.KeyAvailable)
+            if (!Console.KeyAvailable)
             {
-                Console.ReadKey(true);
+                return;
             }
 
+            //while (Console.KeyAvailable)
+            //{
+            //    continue;
+            //}
+            
             ConsoleKeyInfo key = Console.ReadKey(true);
 
             switch (key.Key)
@@ -252,6 +274,29 @@ namespace CaveGame
                 case ConsoleKey.Spacebar:
                     cfg.Cheat(ConsoleKey.Spacebar);
                     break;
+            }
+        }
+    }
+
+    class GUI
+    {
+        private int frames;
+        private int FPS;
+        private DateTime lastTime = DateTime.Now;
+
+        public void FPSCounter()
+        {
+            frames++;
+        }
+        public void ShowFPS()
+        {
+            if ((DateTime.Now - lastTime).TotalSeconds >= 1.0)
+            {
+                FPS = frames;
+                frames = 0;
+                lastTime = DateTime.Now;
+                Console.SetCursorPosition(121, 0);
+                Console.Write($"FPS: {FPS} ");
             }
         }
     }
