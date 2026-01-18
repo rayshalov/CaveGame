@@ -7,12 +7,10 @@
         public string Quit { get; } = "Выйти";
         public string symbol { get; } = "<";
 
-        public int width { get; } = Console.WindowWidth;
-        public int height { get; } = Console.WindowHeight;
+        public int width = Console.WindowWidth;
+        public int height = Console.WindowHeight;
 
-        public void ShowMenuWord()
-        {
-            string[,] menus = new string[5, 14]
+        private string[,] menus = new string[5, 14]
             {
     { "#"," ","#"," ","#","#"," ","#","#","#"," ","#"," ","#" },
     { "#","#","#"," ","#"," "," ","#"," ","#"," ","#"," ","#" },
@@ -20,6 +18,9 @@
     { "#"," ","#"," ","#"," "," ","#"," ","#"," ","#"," ","#" },
     { "#"," ","#"," ","#","#"," ","#"," ","#"," ","#","#","#" }
             };
+
+        public void ShowMenuWord()
+        {
 
             for (int i = 0; i < 5; i++)
             {
@@ -60,7 +61,16 @@
 
             while (true)
             {
+                if (width != Console.WindowWidth || height != Console.WindowHeight) // не доделал
+                {
+                    width = Console.WindowWidth;
+                    height = Console.WindowHeight;
+                    Console.Clear();
+                    ShowMenuWord();
+                }
+
                 ShowMenu();
+
                 ConsoleKeyInfo key = Console.ReadKey(true);
 
                 switch (key.Key)
