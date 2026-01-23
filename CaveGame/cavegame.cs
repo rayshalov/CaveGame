@@ -2,7 +2,7 @@
 using System;
 using System.Globalization;
 using System.Threading;
-using System.Text;
+using System.Runtime.InteropServices;
 
 namespace CaveGame
 {
@@ -12,7 +12,6 @@ namespace CaveGame
         {
             Console.Title = "CaveGame";
             Console.CursorVisible = false;
-            Console.SetBufferSize(Console.LargestWindowWidth, Console.LargestWindowHeight);
 
             Menu menu = new Menu();
             GameMap map = new GameMap();
@@ -30,9 +29,8 @@ namespace CaveGame
                     gui.FPSCounter();
                     Console.SetCursorPosition(0, 0);
                     render.Draw(map, person, person.CheckPosLight());
-                    gui.ShowFPS();
-                    input.GetInputMenu(person, map, render);
-                    //Thread.Sleep(1);
+                    gui.ShowFPS(map);
+                    input.GetInputMenu(person, map, render, gui);
                 }
             }
             else
@@ -74,7 +72,6 @@ namespace CaveGame
     "#   #       #      #              #       #         ######       #             #          #                            #",
     "#   #       #      #                      #                      #             #          #            #               #",
     "#   #       #      #              #       #                      #             #          #            #               #",
-    "#   #       #      #              #       #                      #             #                       #               #",
     "########################################################################################################################"
         };
 
@@ -94,13 +91,12 @@ namespace CaveGame
         private DateTime lightEnd = DateTime.MinValue;
 
         //чит-костыль(мб убрать потом)
-        public void Cheat(ConsoleKey key)
+        public void Cheat()
         {
-            if (key == ConsoleKey.Spacebar)
-            {
-                Console.Clear();
-                visionFlag = !visionFlag;
-            }
+
+            Console.Clear();
+            visionFlag = !visionFlag;
+
 
             if (visionFlag) lightEnd = DateTime.Now.AddYears(1);
             else lightEnd = DateTime.MinValue;
@@ -121,7 +117,6 @@ namespace CaveGame
 
             if (visionFlag)
             {
-
                 if (fieldOnScreen == false)
                 {
                     for (int i = 0; i < map.mapHeight; i++)
@@ -131,7 +126,7 @@ namespace CaveGame
                             Console.Write(map.GetCharOfMap(i, j));
                         }
 
-                        if (i < 29)
+                        if (i < map.mapHeight - 1)
                         {
                             Console.WriteLine();
                         }
@@ -142,16 +137,21 @@ namespace CaveGame
 
                 Console.SetCursorPosition(person.personX, person.personY);
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine(person.person);
+                Console.Write(person.person);
                 Console.ResetColor();
-                Console.SetCursorPosition(person.lastPersonX, person.lastPersonY);
-                Console.WriteLine(map.GetCharOfMap(person.lastPersonY, person.lastPersonX));
+
+                if (person.personX != person.lastPersonX || person.personY != person.lastPersonY)
+                {
+                    Console.SetCursorPosition(person.lastPersonX, person.lastPersonY);
+                    Console.WriteLine(map.GetCharOfMap(person.lastPersonY, person.lastPersonX));
+                }    
+
 
                 if (person.lightX != -1 && person.lightY != -1)
                 {
                     Console.SetCursorPosition(person.lightX, person.lightY);
                     Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine(person.light);
+                    Console.Write(person.light);
                     Console.ResetColor();
                 }
 
@@ -164,6 +164,7 @@ namespace CaveGame
                 for (int y = -4; y <= 4; y++)
                 {
                     flag = true;
+
                     for (int x = -4; x <= 4; x++)
                     {
                         if (person.personY + y >= 0 && person.personY + y < map.mapHeight && person.personX + x >= 0 && person.personX + x < map.mapWidth)
@@ -203,7 +204,14 @@ namespace CaveGame
         }
     }
 
-
+    class Entity
+    {
+        public char entity;
+        public int entityX;
+        public int entityY;
+        public int lastEntityX;
+        public int lastEntityY;
+    }
 
     class Person
     {
@@ -246,6 +254,12 @@ namespace CaveGame
             return false;
         }
 
+        public void PersonLastPosition()
+        {
+            lastPersonX = personX;
+            lastPersonY = personY;
+        }
+
         public void TryMovePerson(int newY, int newX, GameMap map)
         {
 
@@ -253,8 +267,6 @@ namespace CaveGame
             {
                 if (map.GetCharOfMap(newY, newX) != '#')
                 {
-                    lastPersonX = personX;
-                    lastPersonY = personY;
                     personX = newX;
                     personY = newY;
                 }
@@ -264,38 +276,60 @@ namespace CaveGame
 
     class GetInput
     {
-        public void GetInputMenu(Person person, GameMap map, Render render)
+        private DateTime lastMoveTime = DateTime.Now;
+
+        [DllImport("user32.dll")]
+        public static extern short GetAsyncKeyState(int key);
+
+        private bool IsKeyDown(int vKey)
         {
-            if (!Console.KeyAvailable)
+            return (GetAsyncKeyState(vKey) & 0x8000) != 0;
+        }
+        public void GetInputMenu(Person person, GameMap map, Render render, GUI gui)
+        {
+
+            if ((DateTime.Now - lastMoveTime).TotalMilliseconds < 100)
             {
                 return;
             }
 
-            //while (Console.KeyAvailable)
-            //{
-            //    continue;
-            //}
+            person.PersonLastPosition();
 
-            ConsoleKeyInfo key = Console.ReadKey(true);
+            bool moved = false;
 
-            switch (key.Key)
+            if (IsKeyDown(0x57))
             {
-                case ConsoleKey.W:
-                    person.TryMovePerson(person.personY - 1, person.personX, map);
-                    break;
-                case ConsoleKey.S:
-                    person.TryMovePerson(person.personY + 1, person.personX, map);
-                    break;
-                case ConsoleKey.A:
-                    person.TryMovePerson(person.personY, person.personX - 1, map);
-                    break;
-                case ConsoleKey.D:
-                    person.TryMovePerson(person.personY, person.personX + 1, map);
-                    break;
-                case ConsoleKey.Spacebar:
-                    render.Cheat(ConsoleKey.Spacebar);
-                    break;
+                person.TryMovePerson(person.personY - 1, person.personX, map);
+                moved = true;
             }
+            if (IsKeyDown(0x53))
+            {
+                person.TryMovePerson(person.personY + 1, person.personX, map);
+                moved = true;
+            }
+            if (IsKeyDown(0x41))
+            {
+                person.TryMovePerson(person.personY, person.personX - 1, map);
+                moved = true;
+            }
+            if (IsKeyDown(0x44))
+            {
+                person.TryMovePerson(person.personY, person.personX + 1, map);
+                moved = true;
+            }
+
+            if (IsKeyDown(0x20))
+            {
+                render.Cheat();
+                Thread.Sleep(200);
+            }
+
+            if (moved)
+            {
+                lastMoveTime = DateTime.Now;
+            }
+
+            while (Console.KeyAvailable) Console.ReadKey(true);
         }
     }
 
@@ -309,17 +343,19 @@ namespace CaveGame
         {
             frames++;
         }
-        public void ShowFPS()
+
+        public void ShowFPS(GameMap map)
         {
+
             if ((DateTime.Now - lastTime).TotalSeconds >= 1.0)
             {
                 FPS = frames;
                 frames = 0;
                 lastTime = DateTime.Now;
-                Console.SetCursorPosition(0, 30);
+
+                Console.SetCursorPosition(0, map.mapHeight);
                 Console.Write($"FPS: {FPS} ");
             }
         }
     }
 }
-
