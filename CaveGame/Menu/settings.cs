@@ -13,9 +13,11 @@ namespace CaveGame.Menu
         public static int selectedSpeed = 3;
         public static int selectedQuantity = 1;
         public static bool selectedRender = false;
+        public static bool selectedVolumeMode = false;
         public string amountMonsters { get; } = "Количество монстров: ";
         public string monstersSpeed { get; } = "Скорость монстров: ";
         public string render { get; } = "Ограниченная видимость: ";
+        public string volume { get; } = "Звуковое сопровождение: ";
         public string back { get; } = "Назад";
         public string symbol { get; } = "<";
 
@@ -29,7 +31,7 @@ namespace CaveGame.Menu
             {3, "медленная"}
         };
 
-        private Dictionary<bool, string> renderList = new Dictionary<bool, string>
+        private Dictionary<bool, string> YesNoList = new Dictionary<bool, string>
         {
             {false, "да"},
             {true, "нет"}
@@ -47,10 +49,13 @@ namespace CaveGame.Menu
             Console.WriteLine(amountMonsters + selectedQuantity + (selectedButton == 1 ? symbol + "  " : "  "));
 
             Console.SetCursorPosition(centerX, centerY + 2);
-            Console.WriteLine(render + renderList[selectedRender] + (selectedButton == 2 ? symbol + "  " : "  "));
+            Console.WriteLine(render + YesNoList[selectedRender] + (selectedButton == 2 ? symbol + "  " : "  "));
 
             Console.SetCursorPosition(centerX, centerY + 3);
-            Console.WriteLine(back + (selectedButton == 3 ? symbol : "  "));
+            Console.WriteLine(volume + YesNoList[selectedVolumeMode] + (selectedButton == 3 ? symbol + "  " : "  "));
+
+            Console.SetCursorPosition(centerX, centerY + 4);
+            Console.WriteLine(back + (selectedButton == 4 ? symbol : "  "));
         }
 
         public int GetInputSettings()
@@ -72,9 +77,9 @@ namespace CaveGame.Menu
                 switch (key.Key)
                 {
                     case ConsoleKey.Enter:
-                        if (selectedButton == 3)
+                        if (selectedButton == 4)
                         {
-                            return 3;
+                            return 4;
                         }
                         break;
                     case ConsoleKey.W:
@@ -84,7 +89,7 @@ namespace CaveGame.Menu
                         }
                         break;
                     case ConsoleKey.S:
-                        if (selectedButton < 3)
+                        if (selectedButton < 4)
                         {
                             selectedButton++;
                         }
@@ -108,6 +113,10 @@ namespace CaveGame.Menu
                         {
                             selectedRender = !selectedRender;
                         }
+                        else if (selectedButton == 3)
+                        {
+                            selectedVolumeMode = !selectedVolumeMode;
+                        }
                         break;
                     case ConsoleKey.D:
                         if (selectedButton == 0)
@@ -127,6 +136,10 @@ namespace CaveGame.Menu
                         else if (selectedButton == 2)
                         {
                             selectedRender = !selectedRender;
+                        }
+                        else if (selectedButton == 3)
+                        {
+                            selectedVolumeMode = !selectedVolumeMode;
                         }
                         break;
                 }

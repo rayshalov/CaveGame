@@ -10,16 +10,20 @@ namespace CaveGame.Core
 
         private string[] stepSoundList = new string[]
         {
-            "sounds/cavestep1.1.mp3",
-            "sounds/cavestep2.1.mp3",
-            "sounds/cavestep3.1.mp3"
+            "sounds/stepsgame1.mp3",
+            "sounds/stepsgame2.mp3",
+            "sounds/stepsgame3.mp3",
+            "sounds/stepsgame4.mp3",
+            "sounds/stepsgame5.mp3"
         };
 
         private string[] MonsterStepSoundList = new string[]
         {
-            "sounds/cavesteps.mp3",
-            "sounds/cavesteps2.mp3",
-            "sounds/cavesteps3.mp3"
+            "sounds/stepsgame1.mp3",
+            "sounds/stepsgame2.mp3",
+            "sounds/stepsgame3.mp3",
+            "sounds/stepsgame4.mp3",
+            "sounds/stepsgame5.mp3"
         };
 
         public void PlayRandomSteps(float volume)

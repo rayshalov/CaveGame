@@ -1,6 +1,7 @@
 ﻿using CaveGame.Core;
 using CaveGame.Edit;
 using CaveGame.Entities;
+using CaveGame.menu;
 using CaveGame.Menu;
 using System;
 using System.Data;
@@ -36,6 +37,9 @@ namespace CaveGame
                 Editor edit = new Editor();
                 ModeSelect mode = new ModeSelect();
                 AudioManager audio = new AudioManager();
+                Intro intro = new Intro();
+
+                intro.ShowIntro();
 
                 int menuChoise = menu.GetInputMenu();
 
@@ -78,13 +82,12 @@ namespace CaveGame
                             input.GetInputMenu(person, map, render, audio);
                         }
                             Console.Clear();
-
                             Thread.Sleep(2000);
                     }
                     else if (menuModeChoise == 1)
                     {
                         Console.Clear();
-                        string[] maps = edit.GetCustomMaps();
+                        string[] maps = edit.GetCustomMaps(); // получение и выбор кастом карты 
                         int chosen = mode.GetInputCustomMap(maps, false);
                         edit.LoadMap(maps[chosen] + ".txt");
 
@@ -92,7 +95,7 @@ namespace CaveGame
 
                         Console.Clear();
 
-                        var (px, py) = customMap.FindSymbol('@');
+                        var (px, py) = customMap.FindSymbol('@'); // инициализация энтити 
                         if (px != -1)
                         {
                             person.SetPosition(px, py);
@@ -140,14 +143,19 @@ namespace CaveGame
                         Console.Clear();
                         Thread.Sleep(2000);
                     }
+                    else if (menuModeChoise == 2)
+                    {
+                        Console.Clear();
+                        continue;
+                    }
 
 
 
                 }
-                else if (menuChoise == 1)
+                else if (menuChoise == 1) // настройки
                 {
                     Console.Clear();
-                    if (set.GetInputSettings() == 3)
+                    if (set.GetInputSettings() == 4)
                     {
                         Console.Clear();
                         continue;

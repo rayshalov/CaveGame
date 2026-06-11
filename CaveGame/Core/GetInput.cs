@@ -67,13 +67,13 @@ namespace CaveGame.Core
             {
                 lastMoveTime = DateTime.Now;
 
-                bool actuallyMoved = (person.entityX != oldX || person.entityY != oldY);
+                //bool actuallyMoved = (person.entityX != oldX || person.entityY != oldY);
 
-                if (actuallyMoved && (DateTime.Now - lastStepTime).TotalMilliseconds >= 300)
-                {
-                    audio.PlayRandomSteps(1.0f);
-                    lastStepTime = DateTime.Now;
-                }
+                //if (actuallyMoved && (DateTime.Now - lastStepTime).TotalMilliseconds >= 300)
+                //{
+                //    audio.PlayRandomSteps(1.0f);
+                //    lastStepTime = DateTime.Now;
+                //}
             }
 
             while (Console.KeyAvailable)

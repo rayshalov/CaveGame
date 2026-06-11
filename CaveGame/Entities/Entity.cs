@@ -106,7 +106,7 @@ namespace CaveGame.Entities
             {
                 if ((DateTime.Now - lastStepTime).TotalMilliseconds >= 200)
                 {
-                    audio.PlayRandomSteps(volume);
+                    audio.PlayRandomSteps(volume); //xz поиграться с шагами у @ и &
                     lastStepTime = DateTime.Now;
                 }
             }
