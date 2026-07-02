@@ -1,9 +1,9 @@
 using CaveGame.Core;
 using CaveGame.Edit;
 using CaveGame.Entities;
+using CaveGame.menu;
 using CaveGame.Menu;
 using System;
-using System.Collections.Generic; 
 using System.Data;
 using System.Globalization;
 using System.Numerics;
@@ -37,6 +37,9 @@ namespace CaveGame
                 Editor edit = new Editor();
                 ModeSelect mode = new ModeSelect();
                 AudioManager audio = new AudioManager();
+                Intro intro = new Intro();
+
+                intro.ShowIntro();
 
                 int menuChoise = menu.GetInputMenu();
 
@@ -59,7 +62,7 @@ namespace CaveGame
                     {
                         Console.Clear();
 
-                        while (exit.EndOfGame()) 
+                        while (exit.EndOfGame()) // сюжетный цикл
                         {
                             gui.FPSCounter();
                             Console.SetCursorPosition(0, 0);
@@ -78,36 +81,40 @@ namespace CaveGame
                             gui.ShowFPS();
                             input.GetInputMenu(person, map, render, audio);
                         }
-                        Console.Clear();
-
-                        Thread.Sleep(2000);
+                            Console.Clear();
+                            Thread.Sleep(2000);
                     }
                     else if (menuModeChoise == 1)
                     {
                         Console.Clear();
-                        string[] maps = edit.GetCustomMaps();
+                        string[] maps = edit.GetCustomMaps(); // получение списка кастомных карт
+                        
+                        // Проверка: есть ли кастомные карты в папке с игрой
+                        if (maps == null || maps.Length == 0) 
+                        {
+                            Console.Clear();
+                            // Вывод сообщения об ошибке по центру экрана
+                            int centerX = (Console.WindowWidth / 2) - ("Ошибка: кастомные карты не найдены!".Length / 2);
+                            int centerY = (Console.WindowHeight / 2);
+                            Console.SetCursorPosition(centerX, centerY);
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine("Ошибка: кастомные карты не найдены!");
+                            Console.ResetColor();
+                            Console.SetCursorPosition(centerX, centerY + 1);
+                            Console.WriteLine("Нажмите любую клавишу для возврата в меню...");
+                            Console.ReadKey(true);
+                            Console.Clear();
+                            continue; // возврат в главное меню
+                        }
+                        
                         int chosen = mode.GetInputCustomMap(maps, false);
-
-                        try
-                        {
-                            edit.LoadMap(maps[chosen] + ".txt");
-                        }
-                        catch (Exception x)
-                        {
-                            Console.Clear();
-                            Console.WriteLine("Ошибка загрузки карты! Возврат в главное меню...");
-                            Thread.Sleep(2000);
-                            Console.Clear();
-
-                            
-                            continue;
-                        }
+                        edit.LoadMap(maps[chosen] + ".txt");
 
                         GameMap customMap = new GameMap(edit.customMap);
 
                         Console.Clear();
 
-                        var (px, py) = customMap.FindSymbol('@');
+                        var (px, py) = customMap.FindSymbol('@'); // инициализация энтити 
                         if (px != -1)
                         {
                             person.SetPosition(px, py);
@@ -136,7 +143,7 @@ namespace CaveGame
                             customMap.EraseSymbol(ex, ey);
                         }
 
-                        while (exit.EndOfGame()) 
+                        while (exit.EndOfGame()) // кастомный цикл
                         {
                             gui.FPSCounter();
                             Console.SetCursorPosition(0, 0);
@@ -155,17 +162,25 @@ namespace CaveGame
                         Console.Clear();
                         Thread.Sleep(2000);
                     }
+                    else if (menuModeChoise == 2)
+                    {
+                        Console.Clear();
+                        continue;
+                    }
+
+
+
                 }
-                else if (menuChoise == 1)
+                else if (menuChoise == 1) // настройки
                 {
                     Console.Clear();
-                    if (set.GetInputSettings() == 3)
+                    if (set.GetInputSettings() == 4)
                     {
                         Console.Clear();
                         continue;
                     }
                 }
-                else if (menuChoise == 2) 
+                else if (menuChoise == 2) // редактор
                 {
                     Console.Clear();
                     string[] maps = edit.GetCustomMaps();
