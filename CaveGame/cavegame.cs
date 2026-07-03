@@ -45,7 +45,6 @@ namespace CaveGame
                 Editor edit = new Editor();
                 ModeSelect mode = new ModeSelect();
                 AudioManager audio = new AudioManager();
-                Intro intro = new Intro();
 
                 int menuChoise = menu.GetInputMenu();
 
