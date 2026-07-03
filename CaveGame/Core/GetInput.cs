@@ -5,6 +5,7 @@ using CaveGame.Entities;
 using CaveGame.Menu;
 using CaveGame.Edit;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace CaveGame.Core
 {
@@ -17,12 +18,41 @@ namespace CaveGame.Core
         [DllImport("user32.dll")]
         public static extern short GetAsyncKeyState(int key);
 
+        private Dictionary<ConsoleKey, DateTime> recentKeys = new Dictionary<ConsoleKey, DateTime>();
+
+        private void PollConsoleKeys()
+        {
+            while (Console.KeyAvailable)
+            {
+                var key = Console.ReadKey(true).Key;
+                recentKeys[key] = DateTime.Now;
+            }
+        }
+
+        private bool IsKeyDownCrossPlatform(ConsoleKey key)
+        {
+            if (recentKeys.TryGetValue(key, out var time))
+            {
+                return (DateTime.Now - time).TotalMilliseconds < 300;
+            }
+            return false;
+        }
+
         private bool IsKeyDown(int vKey)
         {
+            if (!OperatingSystem.IsWindows())
+            {
+                return false;
+            }
             return (GetAsyncKeyState(vKey) & 0x8000) != 0;
         }
+
         public void GetInputMenu(Person person, GameMap map, Render render, AudioManager audio)
         {
+            if (!OperatingSystem.IsWindows())
+            {
+                PollConsoleKeys();
+            }
 
             if ((DateTime.Now - lastMoveTime).TotalMilliseconds < 150)
             {
@@ -36,28 +66,48 @@ namespace CaveGame.Core
             int oldX = person.entityX;
             int oldY = person.entityY;
 
-            if (IsKeyDown(0x57))
+            bool up, down, left, right, space;
+
+            if (OperatingSystem.IsWindows())
+            {
+                up = IsKeyDown(0x57);
+                down = IsKeyDown(0x53);
+                left = IsKeyDown(0x41);
+                right = IsKeyDown(0x44);
+                space = IsKeyDown(0x20);
+
+            }
+            else
+            {
+                up = IsKeyDownCrossPlatform(ConsoleKey.W);
+                down = IsKeyDownCrossPlatform(ConsoleKey.S);
+                left = IsKeyDownCrossPlatform(ConsoleKey.A);
+                right = IsKeyDownCrossPlatform(ConsoleKey.D);
+                space = IsKeyDownCrossPlatform(ConsoleKey.Spacebar);
+            }
+
+            if (up)
             {
                 person.TryMovePerson(person.entityY - 1, person.entityX, map);
                 moved = true;
             }
-            if (IsKeyDown(0x53))
+            if (down)
             {
                 person.TryMovePerson(person.entityY + 1, person.entityX, map);
                 moved = true;
             }
-            if (IsKeyDown(0x41))
+            if (left)
             {
                 person.TryMovePerson(person.entityY, person.entityX - 1, map);
                 moved = true;
             }
-            if (IsKeyDown(0x44))
+            if (right)
             {
                 person.TryMovePerson(person.entityY, person.entityX + 1, map);
                 moved = true;
             }
 
-            if (IsKeyDown(0x20))
+            if (space)
             {
                 render.Cheat();
                 Thread.Sleep(200);
@@ -66,24 +116,28 @@ namespace CaveGame.Core
             if (moved)
             {
                 lastMoveTime = DateTime.Now;
-
-                bool actuallyMoved = (person.entityX != oldX || person.entityY != oldY);
-
-                if (actuallyMoved && (DateTime.Now - lastStepTime).TotalMilliseconds >= 300)
-                {
-                    audio.PlayRandomSteps(1.0f);
-                    lastStepTime = DateTime.Now;
-                }
             }
 
-            while (Console.KeyAvailable)
+            if (OperatingSystem.IsWindows())
             {
-                Console.ReadKey(true);
+                while (Console.KeyAvailable)
+                {
+                    Console.ReadKey(true);
+                }
+            }
+            else
+            {
+                recentKeys.Clear();
             }
         }
 
         public void GetRedactorInputMenu(Editor edit, Cursor cursor)
         {
+            if (!OperatingSystem.IsWindows())
+            {
+                PollConsoleKeys();
+            }
+
             if ((DateTime.Now - lastMoveTime).TotalMilliseconds < 100)
             {
                 return;
@@ -93,27 +147,52 @@ namespace CaveGame.Core
 
             bool moved = false;
 
-            if (IsKeyDown(0x57))
+            bool up, down, left, right, switchSym, erase, action, tab;
+
+            if (OperatingSystem.IsWindows())
+            {
+                up = IsKeyDown(0x57);
+                down = IsKeyDown(0x53);
+                left = IsKeyDown(0x41);
+                right = IsKeyDown(0x44);
+                switchSym = IsKeyDown(0x51);
+                erase = IsKeyDown(0x45);
+                action = IsKeyDown(0x20);
+                tab = IsKeyDown(0x09);
+            }
+            else
+            {
+                up = IsKeyDownCrossPlatform(ConsoleKey.W);
+                down = IsKeyDownCrossPlatform(ConsoleKey.S);
+                left = IsKeyDownCrossPlatform(ConsoleKey.A);
+                right = IsKeyDownCrossPlatform(ConsoleKey.D);
+                switchSym = IsKeyDownCrossPlatform(ConsoleKey.Q);
+                erase = IsKeyDownCrossPlatform(ConsoleKey.E);
+                action = IsKeyDownCrossPlatform(ConsoleKey.Spacebar);
+                tab = IsKeyDownCrossPlatform(ConsoleKey.Tab);
+            }
+
+            if (up)
             {
                 cursor.TryMoveCursor(cursor.entityY - 1, cursor.entityX, edit);
                 moved = true;
             }
-            if (IsKeyDown(0x53))
+            if (down)
             {
                 cursor.TryMoveCursor(cursor.entityY + 1, cursor.entityX, edit);
                 moved = true;
             }
-            if (IsKeyDown(0x41))
+            if (left)
             {
                 cursor.TryMoveCursor(cursor.entityY, cursor.entityX - 1, edit);
                 moved = true;
             }
-            if (IsKeyDown(0x44))
+            if (right)
             {
                 cursor.TryMoveCursor(cursor.entityY, cursor.entityX + 1, edit);
                 moved = true;
             }
-            if (IsKeyDown(0x51))
+            if (switchSym)
             {
                 if ((DateTime.Now - lastSwitchTime).TotalMilliseconds >= 200)
                 {
@@ -121,7 +200,7 @@ namespace CaveGame.Core
                     lastSwitchTime = DateTime.Now;
                 }
             }
-            if (IsKeyDown(0x45))
+            if (erase)
             {
                 if ((DateTime.Now - lastSwitchTime).TotalMilliseconds >= 200)
                 {
@@ -129,7 +208,7 @@ namespace CaveGame.Core
                     lastSwitchTime = DateTime.Now;
                 }
             }
-            if (IsKeyDown(0x20))
+            if (action)
             {
                 if (cursor.entity == '█')
                 {
@@ -140,7 +219,7 @@ namespace CaveGame.Core
                     edit.TryDraw(cursor.entityY, cursor.entityX);
                 }
             }
-            if (IsKeyDown(0x09))
+            if (tab)
             {
                 edit.switchActiveInput = false;
             }
@@ -150,9 +229,9 @@ namespace CaveGame.Core
                 lastMoveTime = DateTime.Now;
             }
 
-            while (Console.KeyAvailable)
+            if (!OperatingSystem.IsWindows())
             {
-                Console.ReadKey(true);
+                recentKeys.Clear();
             }
         }
     }

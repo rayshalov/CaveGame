@@ -9,6 +9,7 @@ namespace CaveGame.Menu
         private string story = "История";
         private string custom = "Кастомная карта";
         private string symbol = "<";
+        private string back = "Назад";
 
         public void ShowMode()
         {
@@ -20,11 +21,16 @@ namespace CaveGame.Menu
 
             Console.SetCursorPosition(centerX, centerY + 1);
             Console.WriteLine(custom + (selectedButton == 1 ? symbol + "  " : "  "));
+
+            Console.SetCursorPosition(centerX, centerY + 2);
+            Console.WriteLine(back + (selectedButton == 2 ? symbol + "  " : "  "));
         }
 
         public void SelectCustomMap(string[] str)
         {
-                for (int i = 0 ; i < str.Length; i++)
+            for (int i = 0 ; i <= str.Length; i++)
+            {
+                if (i < str.Length)
                 {
                     int centerX = (Console.WindowWidth / 2) - (str.Length / 2);
                     int centerY = (Console.WindowHeight / 2 - (str.Length / 2)) + i;
@@ -32,6 +38,15 @@ namespace CaveGame.Menu
                     Console.SetCursorPosition(centerX, centerY);
                     Console.WriteLine(str[i] + (selectedCustomMap == i ? symbol + "  " : "  "));
                 }
+                else
+                {
+                    int centerX = (Console.WindowWidth / 2) - (str.Length / 2);
+                    int centerY = (Console.WindowHeight / 2 - (str.Length / 2)) + i;
+
+                    Console.SetCursorPosition(centerX, centerY);
+                    Console.WriteLine(back + (i == str.Length ? symbol + "  " : "  "));
+                }
+            }
         }
 
         public void SelectAndEditCustomMap(string[] str)
@@ -75,15 +90,7 @@ namespace CaveGame.Menu
                 switch (key.Key)
                 {
                     case ConsoleKey.Enter:
-                        if (selectedButton == 0)
-                        {
-                            return 0;
-                        }
-                        else if (selectedButton == 1)
-                        {
-                            return 1;
-                        }
-                        break;
+                        return selectedButton;
                     case ConsoleKey.W:
                         if (selectedButton > 0)
                         {
@@ -91,7 +98,7 @@ namespace CaveGame.Menu
                         }
                         break;
                     case ConsoleKey.S:
-                        if (selectedButton < 1)
+                        if (selectedButton < 2)
                         {
                             selectedButton++;
                         }

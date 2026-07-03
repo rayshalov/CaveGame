@@ -4,6 +4,7 @@ using CaveGame.Entities;
 using CaveGame.menu;
 using CaveGame.Menu;
 using System;
+using System.Collections.Generic; // Добавил, так как в коде используется List<>
 using System.Data;
 using System.Globalization;
 using System.Numerics;
@@ -45,6 +46,8 @@ namespace CaveGame
                 Editor edit = new Editor();
                 ModeSelect mode = new ModeSelect();
                 AudioManager audio = new AudioManager();
+                Intro intro = new Intro();
+
 
                 int menuChoise = menu.GetInputMenu();
 
@@ -86,8 +89,8 @@ namespace CaveGame
                             gui.ShowFPS();
                             input.GetInputMenu(person, map, render, audio);
                         }
-                            Console.Clear();
-                            Thread.Sleep(2000);
+                        Console.Clear();
+                        Thread.Sleep(2000);
                     }
                     else if (menuModeChoise == 1)
                     {
