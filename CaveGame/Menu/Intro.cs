@@ -1,19 +1,20 @@
 ﻿using System;
+using System.Threading;
 
 namespace CaveGame.Menu
 {
     class Intro
     {
         private static string CaveGameStr = "CAVEGAME";
-        public void ShowIntro()
+        public static void ShowIntro()
         {
             int startX = (Console.WindowWidth / 2) - (CaveGameStr.Length / 2);
             int centerY = Console.WindowHeight / 2;
 
-            for (int i = 0; i < CaveGameChar.Length; i++)
+            for (int i = 0; i < CaveGameStr.Length; i++)
             {
                 Console.SetCursorPosition(startX + i, centerY);
-                Console.Write(CaveGameChar[i]);
+                Console.Write(CaveGameStr[i]);
                 Thread.Sleep(350);
             }
             Thread.Sleep(1000);

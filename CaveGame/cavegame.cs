@@ -1,7 +1,6 @@
 ﻿using CaveGame.Core;
 using CaveGame.Edit;
 using CaveGame.Entities;
-using CaveGame.menu;
 using CaveGame.Menu;
 using System;
 using System.Data;
@@ -19,9 +18,15 @@ namespace CaveGame
         {
             Console.Title = "CaveGame";
             Console.CursorVisible = false;
-            Console.SetWindowSize(122, 30);
-            Console.SetBufferSize(122, 30);
+            
+            if (OperatingSystem.IsWindows())
+            {
+                Console.SetWindowSize(122, 30);
+                Console.SetBufferSize(122, 30);
+            }
 
+            Intro.ShowIntro();
+            
             while (true)
             {
                 GameMenu menu = new GameMenu();
@@ -39,7 +44,6 @@ namespace CaveGame
                 AudioManager audio = new AudioManager();
                 Intro intro = new Intro();
 
-                intro.ShowIntro();
 
                 int menuChoise = menu.GetInputMenu();
 
@@ -89,6 +93,12 @@ namespace CaveGame
                         Console.Clear();
                         string[] maps = edit.GetCustomMaps(); // получение и выбор кастом карты 
                         int chosen = mode.GetInputCustomMap(maps, false);
+                        if (chosen >= maps.Length)
+                        {
+                            Console.Clear();
+                            continue;
+                        }
+
                         edit.LoadMap(maps[chosen] + ".txt");
 
                         GameMap customMap = new GameMap(edit.customMap);
