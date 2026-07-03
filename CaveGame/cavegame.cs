@@ -1,8 +1,10 @@
-﻿using CaveGame.Core;
+using CaveGame.Core;
 using CaveGame.Edit;
 using CaveGame.Entities;
+using CaveGame.menu;
 using CaveGame.Menu;
 using System;
+using System.Collections.Generic; // Добавил, так как в коде используется List<>
 using System.Data;
 using System.Globalization;
 using System.Numerics;
@@ -19,12 +21,14 @@ namespace CaveGame
             Console.Title = "CaveGame";
             Console.CursorVisible = false;
             
+            // Проверка ОС для установки размера окна (только для Windows)
             if (OperatingSystem.IsWindows())
             {
                 Console.SetWindowSize(122, 30);
                 Console.SetBufferSize(122, 30);
             }
 
+            // Показ интро (статический метод)
             Intro.ShowIntro();
             
             while (true)
@@ -85,13 +89,32 @@ namespace CaveGame
                             gui.ShowFPS();
                             input.GetInputMenu(person, map, render, audio);
                         }
-                            Console.Clear();
-                            Thread.Sleep(2000);
+                        Console.Clear();
+                        Thread.Sleep(2000);
                     }
                     else if (menuModeChoise == 1)
                     {
                         Console.Clear();
-                        string[] maps = edit.GetCustomMaps(); // получение и выбор кастом карты 
+                        string[] maps = edit.GetCustomMaps(); // получение списка кастомных карт
+                        
+                        // Проверка: есть ли кастомные карты в папке с игрой
+                        if (maps == null || maps.Length == 0) 
+                        {
+                            Console.Clear();
+                            // Вывод сообщения об ошибке по центру экрана
+                            int centerX = (Console.WindowWidth / 2) - ("Ошибка: кастомные карты не найдены!".Length / 2);
+                            int centerY = (Console.WindowHeight / 2);
+                            Console.SetCursorPosition(centerX, centerY);
+                            Console.ForegroundColor = ConsoleColor.Red;
+                            Console.WriteLine("Ошибка: кастомные карты не найдены!");
+                            Console.ResetColor();
+                            Console.SetCursorPosition(centerX, centerY + 1);
+                            Console.WriteLine("Нажмите любую клавишу для возврата в меню...");
+                            Console.ReadKey(true);
+                            Console.Clear();
+                            continue; // возврат в главное меню
+                        }
+                        
                         int chosen = mode.GetInputCustomMap(maps, false);
                         if (chosen >= maps.Length)
                         {
@@ -158,9 +181,6 @@ namespace CaveGame
                         Console.Clear();
                         continue;
                     }
-
-
-
                 }
                 else if (menuChoise == 1) // настройки
                 {
