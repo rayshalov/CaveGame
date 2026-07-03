@@ -19,9 +19,17 @@ namespace CaveGame
         {
             Console.Title = "CaveGame";
             Console.CursorVisible = false;
-            Console.SetWindowSize(122, 30);
-            Console.SetBufferSize(122, 30);
+            
+            // Проверка ОС для установки размера окна (только для Windows)
+            if (OperatingSystem.IsWindows())
+            {
+                Console.SetWindowSize(122, 30);
+                Console.SetBufferSize(122, 30);
+            }
 
+            // Показ интро (статический метод)
+            Intro.ShowIntro();
+            
             while (true)
             {
                 GameMenu menu = new GameMenu();
@@ -38,8 +46,6 @@ namespace CaveGame
                 ModeSelect mode = new ModeSelect();
                 AudioManager audio = new AudioManager();
                 Intro intro = new Intro();
-
-                intro.ShowIntro();
 
                 int menuChoise = menu.GetInputMenu();
 
@@ -108,6 +114,12 @@ namespace CaveGame
                         }
                         
                         int chosen = mode.GetInputCustomMap(maps, false);
+                        if (chosen >= maps.Length)
+                        {
+                            Console.Clear();
+                            continue;
+                        }
+
                         edit.LoadMap(maps[chosen] + ".txt");
 
                         GameMap customMap = new GameMap(edit.customMap);
@@ -167,9 +179,6 @@ namespace CaveGame
                         Console.Clear();
                         continue;
                     }
-
-
-
                 }
                 else if (menuChoise == 1) // настройки
                 {
