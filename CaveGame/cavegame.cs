@@ -1,10 +1,9 @@
 using CaveGame.Core;
 using CaveGame.Edit;
 using CaveGame.Entities;
-using CaveGame.menu;
 using CaveGame.Menu;
 using System;
-using System.Collections.Generic; // Добавил, так как в коде используется List<>
+using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
 using System.Numerics;
@@ -21,14 +20,12 @@ namespace CaveGame
             Console.Title = "CaveGame";
             Console.CursorVisible = false;
             
-            // Проверка ОС для установки размера окна (только для Windows)
             if (OperatingSystem.IsWindows())
             {
                 Console.SetWindowSize(122, 30);
                 Console.SetBufferSize(122, 30);
             }
 
-            // Показ интро (статический метод)
             Intro.ShowIntro();
             
             while (true)
@@ -97,12 +94,11 @@ namespace CaveGame
                         Console.Clear();
                         string[] maps = edit.GetCustomMaps(); // получение списка кастомных карт
                         
-                        // Проверка: есть ли кастомные карты в папке с игрой
+                        // Проверка есть ли кастомные карты в папке с игрой
                         if (maps == null || maps.Length == 0) 
                         {
                             Console.Clear();
-                            // Вывод сообщения об ошибке по центру экрана
-                            int centerX = (Console.WindowWidth / 2) - ("Ошибка: кастомные карты не найдены!".Length / 2);
+                            int centerX = (Console.WindowWidth / 2) - ("Кастомные карты не найдены!".Length / 2);
                             int centerY = (Console.WindowHeight / 2);
                             Console.SetCursorPosition(centerX, centerY);
                             Console.ForegroundColor = ConsoleColor.Red;
@@ -112,7 +108,7 @@ namespace CaveGame
                             Console.WriteLine("Нажмите любую клавишу для возврата в меню...");
                             Console.ReadKey(true);
                             Console.Clear();
-                            continue; // возврат в главное меню
+                            continue;
                         }
                         
                         int chosen = mode.GetInputCustomMap(maps, false);
